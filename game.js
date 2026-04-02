@@ -542,8 +542,9 @@ function updateHUD() {
 function gameOver() {
   G.over = true;
   cancelAnimationFrame(rafId);
-  document.getElementById('go-days').textContent = G.day;
-  document.getElementById('go-ref').textContent  = G.refreshed;
+  document.getElementById('go-days').textContent  = G.day;
+  document.getElementById('go-ref').textContent   = G.refreshed;
+  document.getElementById('go-score').textContent = G.score.toLocaleString();
   setTimeout(() => showScreen('gameover-screen'), 500);
 }
 
