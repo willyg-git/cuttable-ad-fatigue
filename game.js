@@ -119,17 +119,18 @@ function newGame() {
   ]);
 
   G = {
-    day:       1,
-    score:     0,
-    refreshed: 0,
-    died:      0,
-    roas:      100,
-    ads:       new Map(),    // Matter body.id → body
-    speed:     1,
-    dayMs:     0,
-    spawnMs:   SPAWN_BASE,   // fire on first frame
-    prevTs:    null,
-    over:      false,
+    day:          1,
+    score:        0,
+    refreshed:    0,
+    died:         0,
+    roas:         100,
+    ads:          new Map(),    // Matter body.id → body
+    speed:        1,
+    fatigueMulti: 1,           // increases each time any ad is refreshed
+    dayMs:        0,
+    spawnMs:      SPAWN_BASE,   // fire on first frame
+    prevTs:       null,
+    over:         false,
   };
 
   updateHUD();
@@ -182,7 +183,7 @@ function update(dt, ts) {
     if (ad.dying) continue;
     // Give each card ~1.2s to fall before draining starts
     if (ts - ad.spawnTs > 1200) {
-      ad.fatigue -= FATIGUE_RATE * G.speed * dt;
+      ad.fatigue -= FATIGUE_RATE * G.speed * G.fatigueMulti * dt;
       if (ad.fatigue <= 0) dead.push(id);
     }
   }
@@ -265,8 +266,9 @@ function refreshAd(id) {
   if (!body || body.adData.dying) return;
 
   const pts = PTS_BASE + (body.adData.fatigue > 60 ? PTS_EARLY : 0);
-  G.score     += pts;
+  G.score        += pts;
   G.refreshed++;
+  G.fatigueMulti  = 1 + G.refreshed * 0.08; // +8% faster per refresh
 
   let h;
   do { h = pick(HOOKS); } while (h === body.adData.hook);
