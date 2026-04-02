@@ -303,10 +303,16 @@ function onCanvasClick(e) {
 function render(ts) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Subtle danger-zone line
+  // Danger zone
   const dangerY = canvas.height * GAMEOVER_FRAC;
   ctx.save();
-  ctx.strokeStyle = 'rgba(255,86,133,0.18)';
+
+  // Red tint over the danger area
+  ctx.fillStyle = 'rgba(255,86,133,0.06)';
+  ctx.fillRect(0, 0, canvas.width, dangerY);
+
+  // Dashed line
+  ctx.strokeStyle = 'rgba(255,86,133,0.45)';
   ctx.setLineDash([8, 8]);
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -314,6 +320,15 @@ function render(ts) {
   ctx.lineTo(canvas.width, dangerY);
   ctx.stroke();
   ctx.setLineDash([]);
+
+  // "OVER BUDGET" label
+  const fontSize = Math.max(8, Math.round(10 * (AD_W / 188)));
+  ctx.fillStyle = 'rgba(255,86,133,0.55)';
+  ctx.font = `bold ${fontSize}px system-ui,sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('OVER BUDGET', canvas.width - 10, dangerY - 4);
+
   ctx.restore();
 
   for (const [, body] of G.ads) {
