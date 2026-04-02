@@ -49,8 +49,8 @@ function preloadAllImages() {
 
 // ── Physics + game constants ───────────────────────────────────────────────────
 
-const AD_W           = 188;   // physics body + draw width
-const AD_H           = 265;   // header(38) + square image(188) + footer(39)
+let AD_W             = 188;   // set dynamically in newGame()
+let AD_H             = 265;   // header + square image + footer
 const GRAVITY        = 1.0;
 const FRICTION       = 0.8;
 const RESTITUTION    = 0.05;
@@ -96,6 +96,10 @@ function newGame() {
   // Match canvas pixels to container layout size
   canvas.width  = containerEl.offsetWidth;
   canvas.height = containerEl.offsetHeight;
+
+  // Responsive card size — target ~4 cards per row, cap at desktop size
+  AD_W = Math.round(Math.min(188, canvas.width / 4.2));
+  AD_H = Math.round(AD_W * (265 / 188));
 
   // Remove any leftover DOM overlays
   containerEl.querySelectorAll('.float, .day-banner').forEach(e => e.remove());
@@ -321,6 +325,7 @@ function drawCard(body) {
   const { x, y } = body.position;
   const ad = body.adData;
   const hw = AD_W / 2, hh = AD_H / 2;
+  const s  = AD_W / 188; // scale factor relative to design size
   const now = performance.now();
 
   const flashAge = now - (ad.flash || 0);
@@ -337,7 +342,7 @@ function drawCard(body) {
   ctx.fillStyle = ad.dying   ? '#1e0808' :
                   isFlash    ? '#12201a' :
                   ad.type === 'ig' ? '#1c1c1e' : '#1e1e24';
-  roundRect(ctx, -hw, -hh, AD_W, AD_H, 10);
+  roundRect(ctx, -hw, -hh, AD_W, AD_H, 10 * s);
   ctx.fill();
 
   // ── Border ──
@@ -350,7 +355,7 @@ function drawCard(body) {
   // ── Avatar circle ──
   ctx.fillStyle = ad.brand.color;
   ctx.beginPath();
-  ctx.arc(-hw + 16, -hh + 16, 11, 0, Math.PI * 2);
+  ctx.arc(-hw + 16*s, -hh + 16*s, 11*s, 0, Math.PI * 2);
   ctx.fill();
 
   // Instagram ring
@@ -358,32 +363,32 @@ function drawCard(body) {
     ctx.strokeStyle = '#c13584';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(-hw + 16, -hh + 16, 14, 0, Math.PI * 2);
+    ctx.arc(-hw + 16*s, -hh + 16*s, 14*s, 0, Math.PI * 2);
     ctx.stroke();
   }
 
   // Initial letter
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 10px system-ui,sans-serif';
+  ctx.font = `bold ${Math.max(7, Math.round(10*s))}px system-ui,sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(ad.brand.init, -hw + 16, -hh + 16);
+  ctx.fillText(ad.brand.init, -hw + 16*s, -hh + 16*s);
 
   // Brand name
   ctx.fillStyle = ad.dying ? '#555' : '#e8e8e8';
-  ctx.font = 'bold 10px system-ui,sans-serif';
+  ctx.font = `bold ${Math.max(7, Math.round(10*s))}px system-ui,sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
   const name = ad.type === 'ig' ? ad.brand.handle : ad.brand.display;
-  ctx.fillText(name, -hw + 34, -hh + 14);
+  ctx.fillText(name, -hw + 34*s, -hh + 14*s);
 
   // Sponsored
   ctx.fillStyle = '#555';
-  ctx.font = '9px system-ui,sans-serif';
-  ctx.fillText('Sponsored', -hw + 34, -hh + 27);
+  ctx.font = `${Math.max(6, Math.round(9*s))}px system-ui,sans-serif`;
+  ctx.fillText('Sponsored', -hw + 34*s, -hh + 27*s);
 
-  // ── Photo strip ──
-  const STRIP_Y = -hh + 38, STRIP_H = AD_W; // square image
+  // ── Photo strip (square) ──
+  const STRIP_Y = -hh + 38*s, STRIP_H = AD_W;
   const imgPath = ad.brand.images[ad.imgIdx];
   const img     = LOADED_IMGS.get(imgPath);
   if (img && img.complete && img.naturalWidth > 0) {
@@ -391,9 +396,9 @@ function drawCard(body) {
     ctx.beginPath();
     ctx.rect(-hw, STRIP_Y, AD_W, STRIP_H);
     ctx.clip();
-    const scale = Math.max(AD_W / img.naturalWidth, STRIP_H / img.naturalHeight);
-    const dw = img.naturalWidth  * scale;
-    const dh = img.naturalHeight * scale;
+    const imgScale = Math.max(AD_W / img.naturalWidth, STRIP_H / img.naturalHeight);
+    const dw = img.naturalWidth  * imgScale;
+    const dh = img.naturalHeight * imgScale;
     ctx.drawImage(img, -hw + (AD_W - dw) / 2, STRIP_Y + (STRIP_H - dh) / 2, dw, dh);
     if (ad.dying) {
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
@@ -406,50 +411,50 @@ function drawCard(body) {
   }
 
   // ── Hook text ──
-  ctx.fillStyle = ad.dying   ? '#444'     :
-                  isFlash    ? '#b2fe15'  : '#e0e0e0';
-  ctx.font = 'bold 10px system-ui,sans-serif';
+  ctx.fillStyle = ad.dying   ? '#444'    :
+                  isFlash    ? '#b2fe15' : '#e0e0e0';
+  ctx.font = `bold ${Math.max(7, Math.round(10*s))}px system-ui,sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
   let hook = ad.hook.toUpperCase();
-  const maxW = AD_W - 20;
+  const maxW = AD_W - 20*s;
   while (hook.length > 1 && ctx.measureText(hook).width > maxW) {
     hook = hook.slice(0, -1);
   }
-  ctx.fillText(hook, -hw + 10, -hh + 38 + AD_W + 14);
+  ctx.fillText(hook, -hw + 10*s, -hh + 38*s + AD_W + 14*s);
 
   // ── FB: Shop Now  /  IG: likes ──
   if (ad.type === 'fb') {
     ctx.fillStyle = '#2e2e38';
-    roundRect(ctx, hw - 72, hh - 25, 62, 17, 4);
+    roundRect(ctx, hw - 72*s, hh - 25*s, 62*s, 17*s, 4*s);
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,0.12)';
     ctx.lineWidth = 0.5;
     ctx.stroke();
     ctx.fillStyle = '#bbb';
-    ctx.font = '8px system-ui,sans-serif';
+    ctx.font = `${Math.max(6, Math.round(8*s))}px system-ui,sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Shop Now', hw - 41, hh - 17);
+    ctx.fillText('Shop Now', hw - 41*s, hh - 17*s);
   } else {
     const lk = ad.likes > 999
       ? '♡ ' + (ad.likes / 1000).toFixed(1) + 'K likes'
       : '♡ ' + ad.likes + ' likes';
     ctx.fillStyle = '#777';
-    ctx.font = '9px system-ui,sans-serif';
+    ctx.font = `${Math.max(6, Math.round(9*s))}px system-ui,sans-serif`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(lk, -hw + 10, -hh + 38 + AD_W + 27);
+    ctx.fillText(lk, -hw + 10*s, -hh + 38*s + AD_W + 27*s);
   }
 
   // ── Fatigue bar ──
   if (!ad.dying) {
     const pct = Math.max(0, ad.fatigue) / 100;
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillRect(-hw, hh - 5, AD_W, 5);
+    ctx.fillRect(-hw, hh - 5*s, AD_W, 5*s);
     ctx.fillStyle = pct < 0.25 ? '#ff5685' : pct < 0.55 ? '#ffa94d' : '#b2fe15';
-    ctx.fillRect(-hw, hh - 5, AD_W * pct, 5);
+    ctx.fillRect(-hw, hh - 5*s, AD_W * pct, 5*s);
   }
 
   ctx.restore();
