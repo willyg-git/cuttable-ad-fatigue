@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ad Fatigue Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Start Screen ──────────────────────────────── -->
+  <div id="start-screen" class="screen active">
+    <div class="panel">
+      <img src="images/cuttablelogo.jpg" alt="Cuttable" class="brand-logo">
+      <p class="brand-tag">cuttable.com</p>
+      <h1>Ad Fatigue<br>Simulator</h1>
+      <p class="sub">Click ads to refresh them before they fatigue out.<br>Every dead ad tanks your ROAS.</p>
+      <button id="start-btn">start campaign</button>
+    </div>
+  </div>
+
+  <!-- ── Game Screen ───────────────────────────────── -->
+  <div id="game-screen" class="screen">
+    <div id="hud">
+      <div class="stat">
+        <span class="lbl">DAY</span>
+        <span class="val" id="hud-day">1</span>
+      </div>
+      <div class="stat">
+        <span class="lbl">SCORE</span>
+        <span class="val" id="hud-score">0</span>
+      </div>
+      <div class="stat">
+        <span class="lbl">REFRESHED</span>
+        <span class="val" id="hud-ref">0</span>
+      </div>
+      <div class="stat">
+        <span class="lbl">DIED</span>
+        <span class="val red" id="hud-died">0</span>
+      </div>
+      <div class="stat roas-stat">
+        <span class="lbl">ROAS</span>
+        <div class="roas-track"><div id="roas-fill"></div></div>
+        <span class="val" id="hud-roas-val">100</span>
+      </div>
+    </div>
+    <!-- game-container holds canvas + DOM overlays (float text, day banners) -->
+    <div id="game-container">
+      <canvas id="game-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Game Over Screen ──────────────────────────── -->
+  <div id="gameover-screen" class="screen">
+    <div class="panel">
+      <img src="images/cuttablelogo.jpg" alt="Cuttable" class="brand-logo">
+      <p class="brand-tag">cuttable.com</p>
+      <h1>Campaign<br>dead.</h1>
+      <div class="results">
+        <div class="result-row"><span>Days survived</span><strong id="go-days">—</strong></div>
+        <div class="result-row"><span>Ads refreshed</span><strong id="go-ref">—</strong></div>
+      </div>
+      <p class="tagline">Cuttable teams don't run out of creative.</p>
+      <a class="cta" href="https://cuttable.com" target="_blank" rel="noopener">see how cuttable solves this →</a>
+      <button id="retry-btn">try again</button>
+      <button id="linkedin-btn" class="linkedin-share">Share to LinkedIn</button>
+      <p class="credit">
+        Built by Will Gerard using AI<br>
+        <a href="mailto:will@willgerard.com">email</a> &middot;
+        <a href="https://linkedin.com/in/willgerard" target="_blank" rel="noopener">linkedin</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
